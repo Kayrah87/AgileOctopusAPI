@@ -26,14 +26,14 @@ Once it is included in your project you can instantiate the API in your project 
 
 `$region` is the DNO code from the region you wish to get the price for. For more information or if you are not sure, see [energy-stats.uk](https://www.energy-stats.uk/dno-region-codes-explained/)
 
-###⚡ Half-Hourly Electricity Prices<br>
+### ⚡ Half-Hourly Electricity Prices<br>
 The half hourly electricity prices can be called using
 
 `$api->getHalfHourlyRates($region)`
 
 where `$region` is the DNO for the desired region.
 
-###⚡ Electricity Meter Point Details
+### ⚡ Electricity Meter Point Details
 
 The meter point details (for electric only) can be called using
 
