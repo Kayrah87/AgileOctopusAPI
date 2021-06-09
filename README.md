@@ -2,7 +2,7 @@
 Welcome to the Agile Octopus API Wrapper.<br>
 This may be included in any PHP project and will soon be adapted for Laravel
 
-You may access all of the information you require for this package at [Octopus.energy]('https://octopus.energy/dashboard/developer)
+You may access all of the information you require for this package at [Octopus Energy]('https://octopus.energy/dashboard/developer)
 
 ---
 
