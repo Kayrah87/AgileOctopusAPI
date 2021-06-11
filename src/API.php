@@ -16,7 +16,7 @@ class API
     protected $product_code;
     protected $client;
 
-    public function __construct($account, $key, $tz)
+    public function __construct(string $account, string $key, string $tz)
     {
         $this->key     = $key;
         $this->account = $account;
@@ -36,7 +36,7 @@ class API
      *
      * @return array|string
      */
-    public function getMeterPointDetails($mpan)
+    public function getMeterPointDetails(string $mpan) : array
     {
         if (empty($mpan) || strlen($mpan) !== 13) {
             return $this->buildResponse('Error', [], 'Incorrect or missing MPAN');
@@ -56,8 +56,10 @@ class API
      *
      * @return string
      * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * returns raw json response contents from the API
      */
-    private function doConnection($uri)
+    private function doConnection(string $uri) : string
     {
         return $this->client->get($uri, [
             'auth' => [
@@ -114,7 +116,7 @@ class API
      *
      * @return mixed
      */
-    public function getElectricityPrice($region, $including_vat = true, $specific_datetime = null) :array
+    public function getElectricityPrice(string $region, bool $including_vat = true, string $specific_datetime = null) :array
     {
         $datetime = empty($specific_datetime) ? Carbon::now() : Carbon::parse($specific_datetime);
         $tariffs  = $this->getHalfHourlyRates($region, $datetime)['data'];
@@ -140,7 +142,7 @@ class API
      * @return string
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getHalfHourlyRates($region, $date = null):array
+    public function getHalfHourlyRates(string $region, string $date = null):array
     {
         if(empty($region)) {
             return $this->buildResponse('Error', [], 'Not enough input to proceed');
@@ -186,7 +188,7 @@ class API
      * takes the region and builds a URL for retrieving tariff information
      *
      */
-    private function getTariffURL($region)
+    private function getTariffURL(string $region) : string
     {
         if(empty($region)) {
             return $this->buildResponse('Error', [], 'Not enough input to proceed');
@@ -197,7 +199,18 @@ class API
         return $this->product_url."electricity-tariffs/$tariff_code/standard-unit-rates";
     }
 
-    private function buildResponse($status, $data, $message = null)
+    /**
+     * @param $status
+     * @param $data
+     * @param  null  $message
+     *
+     * @return array
+     *
+     * Builds a response with data and status of the request from the
+     * Agile API.
+     *
+     */
+    private function buildResponse(string $status, $data, string $message = null) : array
     {
         return [
                                'status' => [
