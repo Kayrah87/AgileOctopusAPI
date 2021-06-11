@@ -3,16 +3,17 @@
 use Carbon\Carbon;
 
 include('src/API.php');
+include_once('vendor/autoload.php');
 
 /**
  * Edit this detail with your own from https://octopus.energy/dashboard/developer
  */
-$api_key            = 'your_key';
-$account            = 'your_account';
-$electricity_mpan   = '0000000000000';
-$electricity_serial = '0000000000';
-$gas_mprn           = '0000000000';
-$gas_serial         = 'G4W00000000';
+$api_key            = '';
+$account            = 'A-';
+$electricity_mpan   = '';
+$electricity_serial = '';
+$gas_mprn           = '';
+$gas_serial         = '';
 $region             = 'B';
 $tz                 = "Europe/London";
 $gas_unit_price     = 2.9;
@@ -34,12 +35,11 @@ $styles = [
 $api = new kayrah87\AgileOctopusAPI\API($account, $api_key, $tz);
 
 //get the relevant data from the wrapper
-$electricity_point       = json_decode($api->getMeterPointDetails($electricity_mpan));
-$electricity_consumption = json_decode($api->getMeterPointConsumption($electricity_mpan, $electricity_serial,
-                                                                      Carbon::now($tz)
-                                                                            ->subDays(3)));
-$gas_consumption         = json_decode($api->getMeterPointConsumption($gas_mprn, $gas_serial, Carbon::now($tz)
-                                                                                                    ->subDays(3)));
+$electricity_point       = $api->getMeterPointDetails($electricity_mpan)['data'];
+$electricity_consumption = $api->getMeterPointConsumption($electricity_mpan, $electricity_serial, Carbon::now($tz)
+                                                                                                        ->subDays(3))['data'];
+$gas_consumption         = $api->getMeterPointConsumption($gas_mprn, $gas_serial, Carbon::now($tz)
+                                                                                        ->subDays(3))['data'];
 ?>
 
 <head>
@@ -83,7 +83,7 @@ $gas_consumption         = json_decode($api->getMeterPointConsumption($gas_mprn,
                         </div>
                         <div class="text-xl font-bold">
                             <?php
-                            echo $api->getElectricityPrice($region)." p/Kwh";
+                            echo $api->getElectricityPrice($region)['data']." p/Kwh";
                             ?>
                         </div>
                     </div>
@@ -131,7 +131,7 @@ $gas_consumption         = json_decode($api->getMeterPointConsumption($gas_mprn,
                     <tbody class="bg-grey-light flex flex-col items-center justify-between overflow-y-scroll w-full h-64">
                     <?php
 
-                    foreach ($api->getHalfHourlyRates($region) as $rate) {
+                    foreach ($api->getHalfHourlyRates($region)['data'] as $rate) {
                         echo "<tr class=\"flex w-full pl-2\">
 <td {$styles['hourly_rates']['cell_hideable']}>".Carbon::parse($rate->valid_from)
                                                        ->format('d/m/Y')."</td>
@@ -169,7 +169,7 @@ $gas_consumption         = json_decode($api->getMeterPointConsumption($gas_mprn,
                                 <div class="font-medium">GSP</div>
                             </div>
                             <div class="text-gray-600 text-xs"><?php
-                                echo $electricity_point->gsp ?></div>
+                                echo $electricity_point->gsp ?? '' ?></div>
                         </div>
                     </li>
                     <li class="border-gray-400 flex flex-row mb-2">
@@ -181,7 +181,7 @@ $gas_consumption         = json_decode($api->getMeterPointConsumption($gas_mprn,
                                 <div class="font-medium">MPAN</div>
                             </div>
                             <div class="text-gray-600 text-xs"><?php
-                                echo $electricity_point->mpan ?></div>
+                                echo $electricity_point->mpan ?? '' ?></div>
                         </div>
                     </li>
                     <li class="border-gray-400 flex flex-row mb-2">
@@ -193,7 +193,7 @@ $gas_consumption         = json_decode($api->getMeterPointConsumption($gas_mprn,
                                 <div class="font-medium">Profile Class</div>
                             </div>
                             <div class="text-gray-600 text-xs"><?php
-                                echo $electricity_point->profile_class ?></div>
+                                echo $electricity_point->profile_class ?? '' ?></div>
                         </div>
                     </li>
                 </ul>
@@ -240,7 +240,7 @@ $gas_consumption         = json_decode($api->getMeterPointConsumption($gas_mprn,
                     <tbody class="bg-grey-light flex flex-col items-center justify-between overflow-y-scroll w-full h-64">
                     <?php
 
-                    foreach ($electricity_consumption->results as $key => $consumption_period) {
+                    foreach (($electricity_consumption->results ?? []) as $key => $consumption_period) {
                         echo "<tr class=\"flex w-full pl-2\">
 <td {$styles['consumption']['cell_hideable']}>".Carbon::parse($consumption_period->interval_start)
                                                       ->format('d/m/Y')."</td>
@@ -249,12 +249,12 @@ $gas_consumption         = json_decode($api->getMeterPointConsumption($gas_mprn,
 <td {$styles['consumption']['cell']}>".Carbon::parse($consumption_period->interval_end)
                                              ->format('H:i')."</td>
 <td {$styles['consumption']['cell']}>".round($consumption_period->consumption, 3)."</td>
-<td {$styles['consumption']['cell']}>".round($consumption_period->consumption * $api->getElectricityPrice($region,
-                                                                                                          false,
-                                                                                                          $consumption_period->interval_start),
-                                             1)." p</td>
-<td {$styles['consumption']['cell']}>".round($consumption_period->consumption * $api->getElectricityPrice($region, true,
-                                                                                                          $consumption_period->interval_start),
+<td {$styles['consumption']['cell']}>".round(($consumption_period->consumption * $api->getElectricityPrice($region,
+                                                                                                           false,
+                                                                                                           $consumption_period->interval_start)['data']),
+                                1)." p</td>
+<td {$styles['consumption']['cell']}>".round(($consumption_period->consumption * $api->getElectricityPrice($region, true,
+                                                                                                          $consumption_period->interval_start)['data']),
                                              1)." p</td>
 </tr>";
                     }
@@ -305,7 +305,7 @@ $gas_consumption         = json_decode($api->getMeterPointConsumption($gas_mprn,
                     <tbody class="bg-grey-light flex flex-col items-center justify-between overflow-y-scroll w-full h-64">
                     <?php
 
-                    foreach ($gas_consumption->results as $key => $consumption_period) {
+                    foreach (($gas_consumption->results ?? []) as $key => $consumption_period) {
                         echo "<tr class=\"flex w-full pl-2\">
 <td {$styles['consumption']['cell_hideable']}>".Carbon::parse($consumption_period->interval_start)
                                                       ->format('d/m/Y')."</td>

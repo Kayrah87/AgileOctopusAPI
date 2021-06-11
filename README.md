@@ -4,7 +4,7 @@ This may be included in any PHP project and will soon be adapted for Laravel
 
 You may access all of the information you require for this package at [Octopus Energy]('https://octopus.energy/dashboard/developer)
 
----
+***
 
 ##Basic Usage
 installing Agile Octopus API is as simple as requiring it through composer
@@ -64,8 +64,7 @@ The gas meter point half-hourly consumption can be called using
 `$electricity_serial` is the serial number from your gas meter found under your developer dashboard.
 `$date` is the date you want to get the consumption for.
 
----
-
+***
 ##Queries
 If you have any queries please raise a github issue.
 If you like this API then consider telling your friends about it and earn both them and me £50 in the process:
