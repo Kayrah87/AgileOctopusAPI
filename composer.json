@@ -2,6 +2,8 @@
     "name": "kayrah87/agile-octopus-api",
     "description": "A package to wrap the various commands to interact with Agile Octopus tarriffs API",
     "type": "library",
+    "keywords": ["energy","octopus","agile","smart","API","wrapper","electricity","gas","supplier"],
+    "homepage": "https://github.com/Kayrah87/AgileOctopusAPI",
     "require": {
         "nesbot/carbon": "^2.48",
         "guzzlehttp/guzzle": "^7.3",

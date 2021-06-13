@@ -9,7 +9,7 @@ You may access all of the information you require for this package at [Octopus E
 ## Basic Usage
 installing Agile Octopus API is as simple as requiring it through composer
 
-`$ composer require kayrah87/agileoctopusapi`
+`$ composer require kayrah87/agile-octopus-api`
 
 Once it is included in your project you can instantiate the API in your project thusly:
 

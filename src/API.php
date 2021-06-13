@@ -27,8 +27,8 @@ class API
         $this->product_url  = "products/$this->product_code/";
 
         $this->client = new Client([
-                                       'base_uri' => $this->base_url,
-                                   ]);
+            'base_uri' => $this->base_url,
+        ]);
     }
 
     /**
@@ -36,7 +36,7 @@ class API
      *
      * @return array|string
      */
-    public function getMeterPointDetails(string $mpan) : array
+    public function getMeterPointDetails(string $mpan): array
     {
         if (empty($mpan) || strlen($mpan) !== 13) {
             return $this->buildResponse('Error', [], 'Incorrect or missing MPAN');
@@ -52,6 +52,28 @@ class API
     }
 
     /**
+     * @param $status
+     * @param $data
+     * @param  null  $message
+     *
+     * @return array
+     *
+     * Builds a response with data and status of the request from the
+     * Agile API.
+     *
+     */
+    private function buildResponse(string $status, $data, string $message = null): array
+    {
+        return [
+            'status' => [
+                'response' => $status,
+                'reason'   => $message ?? 'OK',
+            ],
+            'data'   => $data,
+        ];
+    }
+
+    /**
      * @param $uri
      *
      * @return string
@@ -59,7 +81,7 @@ class API
      *
      * returns raw json response contents from the API
      */
-    private function doConnection(string $uri) : string
+    private function doConnection(string $uri): string
     {
         return $this->client->get($uri, [
             'auth' => [
@@ -83,7 +105,6 @@ class API
     {
         if (empty($mpan) || empty($serial)) {
             return $this->buildResponse('Error', [], 'Not enough input to proceed');
-
         }
 
         $date = empty($date) ? Carbon::parse('yesterday', $this->tz) : Carbon::parse($date);
@@ -105,7 +126,6 @@ class API
             return $this->buildResponse('OK', json_decode($this->doConnection($uri)));
         } catch (Exception $e) {
             return $this->buildResponse('Error', [], $e->getMessage());
-
         }
     }
 
@@ -116,7 +136,7 @@ class API
      *
      * @return mixed
      */
-    public function getElectricityPrice(string $region, bool $including_vat = true, string $specific_datetime = null) :array
+    public function getElectricityPrice(string $region, bool $including_vat = true, string $specific_datetime = null): array
     {
         $datetime = empty($specific_datetime) ? Carbon::now() : Carbon::parse($specific_datetime);
         $tariffs  = $this->getHalfHourlyRates($region, $datetime)['data'];
@@ -126,12 +146,12 @@ class API
             if ($datetime->greaterThanOrEqualTo($valid_from) && $datetime->lessThan($valid_to)) {
                 if ($including_vat === true) {
                     return $this->buildResponse('OK', $tariff->value_inc_vat);
-                }
-                else {
+                } else {
                     return $this->buildResponse('OK', $tariff->value_exc_vat);
                 }
             }
         }
+
         return $this->buildResponse('Error', 0, 'No electricity prices found');
     }
 
@@ -142,11 +162,10 @@ class API
      * @return string
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getHalfHourlyRates(string $region, string $date = null):array
+    public function getHalfHourlyRates(string $region, string $date = null): array
     {
-        if(empty($region)) {
+        if (empty($region)) {
             return $this->buildResponse('Error', [], 'Not enough input to proceed');
-
         }
         $datetime = empty($date) ? Carbon::now($this->tz) : Carbon::parse($date)
                                                                   ->setTimezone($this->tz);
@@ -173,10 +192,8 @@ class API
             }
 
             return $this->buildResponse('OK', $response->results);
-
         } catch (Exception $e) {
             return $this->buildResponse('Error', [], $e->getMessage());
-
         }
     }
 
@@ -188,37 +205,15 @@ class API
      * takes the region and builds a URL for retrieving tariff information
      *
      */
-    private function getTariffURL(string $region) : string
+    private function getTariffURL(string $region): string
     {
-        if(empty($region)) {
+        if (empty($region)) {
             return $this->buildResponse('Error', [], 'Not enough input to proceed');
         }
 
         $tariff_code = "E-1R-$this->product_code-$region";
 
         return $this->product_url."electricity-tariffs/$tariff_code/standard-unit-rates";
-    }
-
-    /**
-     * @param $status
-     * @param $data
-     * @param  null  $message
-     *
-     * @return array
-     *
-     * Builds a response with data and status of the request from the
-     * Agile API.
-     *
-     */
-    private function buildResponse(string $status, $data, string $message = null) : array
-    {
-        return [
-                               'status' => [
-                                   'response' => $status,
-                                   'reason'   => $message ?? 'OK',
-                               ],
-                               'data' => $data
-                           ];
     }
 
 }
